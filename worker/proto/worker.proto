@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "./gen";
+
+service Worker {
+  rpc SetTestScript(SetTestScriptReq) returns(Empty) {}
+  rpc Start(Empty) returns(StartResp) {}
+  rpc Stop(Empty) returns(Empty) {}
+  rpc Health(Empty) returns(stream HealthResp) {}
+}
+
+message HealthResp {
+  WorkerStatus status = 4;
+}
+
+message StartResp {
+  string host = 1;
+  string ip = 2;
+  int32 port = 3;
+}
+
+message SetTestScriptReq {
+  string script = 1;
+}
+
+message Empty {
+}
+
+enum WorkerStatus {
+  READY = 0;
+  DONE = 1;
+  ERROR = 2;
+}
+

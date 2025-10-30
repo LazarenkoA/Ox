@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Testing Control Panel</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="title">Панель управление нагрузочным тестом</h1>
+                <div class="global-status" id="globalStatus">
+                    <span class="status-dot status-ready"></span>
+                    <!-- <span class="status-text">System Ready</span>-->
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="workers-count">
+                    <span class="count-label">Total Workers</span>
+                    <span class="count-value" id="totalWorkers">{{ len .Workers }}</span>
+                </div>
+                <div class="master-controls">
+                    <button class="btn btn-success btn-large" id="startAllBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        START ALL TESTS
+                    </button>
+                    <button class="btn btn-danger btn-large" id="stopAllBtn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="6" y="6" width="12" height="12"></rect>
+                        </svg>
+                        STOP ALL TESTS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Parallel Tests Configuration Section -->
+        <section class="parallel-config-section">
+            <div class="section-header" id="parallelConfigHeader">
+                <h2 class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                        <line x1="4" y1="6" x2="20" y2="6"></line>
+                        <line x1="4" y1="12" x2="20" y2="12"></line>
+                        <line x1="4" y1="18" x2="20" y2="18"></line>
+                    </svg>
+                    Параллельное выполнение тестов
+                </h2>
+                <button class="toggle-btn" id="toggleParallelConfig">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+            <div class="parallel-config-content" id="parallelConfigContent">
+                <!-- Batch Apply Tab -->
+                <div class="config-tab-content.active" id="batchTab-">
+                    <div class="batch-apply-container">
+                        <div class="form-group">
+                            <label class="form-label">Установите параллельные тесты для всех воркеров</label>
+                            <div class="batch-apply-controls">
+                                <input type="number" id="batchParallelInput" class="form-input" min="1" max="1000" value="20" placeholder="Enter value...">
+                                <button class="btn btn-primary" id="applyToAllBtn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    Apply to All
+                                </button>
+                            </div>
+                            <div class="batch-info">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                                <span>Это приведет к обновлению всех воркеров до указанного значения</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workers Grid Section -->
+        <section class="workers-section">
+            <h2 class="section-title">Workers</h2>
+            <div class="workers-grid" id="workersGrid">
+                <!-- Worker cards will be dynamically generated -->
+            </div>
+        </section>
+
+        <!-- Script Management Section -->
+        <section class="script-section">
+            <div class="section-header" id="scriptSectionHeader">
+                <h2 class="section-title">Script Management</h2>
+                <button class="toggle-btn" id="toggleScriptSection">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+            <div class="script-content" id="scriptContent">
+                <div class="script-tabs">
+                    <button class="tab-btn active" data-tab="individual">Individual</button>
+                    <button class="tab-btn" data-tab="batch">Batch Deploy</button>
+                </div>
+
+                <!-- Individual Mode -->
+                <div class="tab-content active" id="individualTab">
+                    <div class="form-group">
+                        <label class="form-label">Select Worker</label>
+                        <select class="form-select" id="workerSelect">
+                            <option value="">Choose a worker...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">JavaScript Test Script</label>
+                        <textarea class="code-editor" id="individualScript" rows="12" placeholder="Enter your test script...">// Sample Load Test Script
+export default function() {
+  const response = http.get('https://api.example.com/endpoint');
+  check(response, {
+    'status is 200': (r) =&gt; r.status === 200,
+    'response time &lt; 500ms': (r) =&gt; r.timings.duration &lt; 500
+  });
+  sleep(1);
+}</textarea>
+                    </div>
+                    <button class="btn btn-primary" id="deployIndividualBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Deploy to Worker
+                    </button>
+                </div>
+
+                <!-- Batch Mode -->
+                <div class="tab-content" id="batchTab">
+                    <div class="form-group">
+                        <div class="batch-header">
+                            <label class="form-label">Select Workers</label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="selectAllWorkers">
+                                <span>Select All</span>
+                            </label>
+                        </div>
+                        <div class="workers-checklist" id="workersChecklist">
+                            <!-- Worker checkboxes will be dynamically generated -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">JavaScript Test Script</label>
+                        <textarea class="code-editor" id="batchScript" rows="12" placeholder="Enter your test script...">// Sample Load Test Script
+export default function() {
+  const response = http.get('https://api.example.com/endpoint');
+  check(response, {
+    'status is 200': (r) =&gt; r.status === 200,
+    'response time &lt; 500ms': (r) =&gt; r.timings.duration &lt; 500
+  });
+  sleep(1);
+}</textarea>
+                    </div>
+                    <button class="btn btn-primary" id="deployBatchBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Deploy to Selected Workers
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Bar -->
+        <section class="status-bar">
+            <div class="status-metrics">
+                <div class="metric-card">
+                    <div class="metric-label">Total Requests</div>
+                    <div class="metric-value" id="totalRequests">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg Response Time</div>
+                    <div class="metric-value" id="avgResponseTime">0 ms</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Error Rate</div>
+                    <div class="metric-value" id="errorRate">0%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Test Duration</div>
+                    <div class="metric-value" id="testDuration">00:00:00</div>
+                </div>
+                <div class="metric-card connection-status">
+                    <div class="metric-label">Observer Connection</div>
+                    <div class="connection-indicator">
+                        <span class="status-dot status-ready"></span>
+                        <span class="connection-text">Connected</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                Are you sure you want to proceed?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">Cancel</button>
+                <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/app.js"></script>
+</body>
+</html>
