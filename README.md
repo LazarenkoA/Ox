@@ -1,8 +1,9 @@
 
 # Ox — Нагрузочное тестирование 1С
 
-
+<div style="text-align:center">
 <img src="docs/img/logo.png" width="200" />
+</div>
 
 
 
