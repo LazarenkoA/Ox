@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Worker_SetTestScript_FullMethodName = "/Worker/SetTestScript"
-	Worker_Start_FullMethodName         = "/Worker/Start"
-	Worker_Stop_FullMethodName          = "/Worker/Stop"
-	Worker_Health_FullMethodName        = "/Worker/Health"
+	Worker_SetTestScript_FullMethodName       = "/Worker/SetTestScript"
+	Worker_Start_FullMethodName               = "/Worker/Start"
+	Worker_Stop_FullMethodName                = "/Worker/Stop"
+	Worker_ObserverChangeState_FullMethodName = "/Worker/ObserverChangeState"
 )
 
 // WorkerClient is the client API for Worker service.
@@ -30,9 +30,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
 	SetTestScript(ctx context.Context, in *SetTestScriptReq, opts ...grpc.CallOption) (*Empty, error)
-	Start(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StartResp, error)
+	Start(ctx context.Context, in *StartResp, opts ...grpc.CallOption) (*Empty, error)
 	Stop(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
-	Health(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HealthResp], error)
+	ObserverChangeState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StatusInfo], error)
 }
 
 type workerClient struct {
@@ -53,9 +53,9 @@ func (c *workerClient) SetTestScript(ctx context.Context, in *SetTestScriptReq, 
 	return out, nil
 }
 
-func (c *workerClient) Start(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*StartResp, error) {
+func (c *workerClient) Start(ctx context.Context, in *StartResp, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StartResp)
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, Worker_Start_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -73,13 +73,13 @@ func (c *workerClient) Stop(ctx context.Context, in *Empty, opts ...grpc.CallOpt
 	return out, nil
 }
 
-func (c *workerClient) Health(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HealthResp], error) {
+func (c *workerClient) ObserverChangeState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StatusInfo], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[0], Worker_Health_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[0], Worker_ObserverChangeState_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[Empty, HealthResp]{ClientStream: stream}
+	x := &grpc.GenericClientStream[Empty, StatusInfo]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -90,16 +90,16 @@ func (c *workerClient) Health(ctx context.Context, in *Empty, opts ...grpc.CallO
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Worker_HealthClient = grpc.ServerStreamingClient[HealthResp]
+type Worker_ObserverChangeStateClient = grpc.ServerStreamingClient[StatusInfo]
 
 // WorkerServer is the server API for Worker service.
 // All implementations must embed UnimplementedWorkerServer
 // for forward compatibility.
 type WorkerServer interface {
 	SetTestScript(context.Context, *SetTestScriptReq) (*Empty, error)
-	Start(context.Context, *Empty) (*StartResp, error)
+	Start(context.Context, *StartResp) (*Empty, error)
 	Stop(context.Context, *Empty) (*Empty, error)
-	Health(*Empty, grpc.ServerStreamingServer[HealthResp]) error
+	ObserverChangeState(*Empty, grpc.ServerStreamingServer[StatusInfo]) error
 	mustEmbedUnimplementedWorkerServer()
 }
 
@@ -113,14 +113,14 @@ type UnimplementedWorkerServer struct{}
 func (UnimplementedWorkerServer) SetTestScript(context.Context, *SetTestScriptReq) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetTestScript not implemented")
 }
-func (UnimplementedWorkerServer) Start(context.Context, *Empty) (*StartResp, error) {
+func (UnimplementedWorkerServer) Start(context.Context, *StartResp) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
 }
 func (UnimplementedWorkerServer) Stop(context.Context, *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
 }
-func (UnimplementedWorkerServer) Health(*Empty, grpc.ServerStreamingServer[HealthResp]) error {
-	return status.Errorf(codes.Unimplemented, "method Health not implemented")
+func (UnimplementedWorkerServer) ObserverChangeState(*Empty, grpc.ServerStreamingServer[StatusInfo]) error {
+	return status.Errorf(codes.Unimplemented, "method ObserverChangeState not implemented")
 }
 func (UnimplementedWorkerServer) mustEmbedUnimplementedWorkerServer() {}
 func (UnimplementedWorkerServer) testEmbeddedByValue()                {}
@@ -162,7 +162,7 @@ func _Worker_SetTestScript_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _Worker_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(StartResp)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func _Worker_Start_Handler(srv interface{}, ctx context.Context, dec func(interf
 		FullMethod: Worker_Start_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkerServer).Start(ctx, req.(*Empty))
+		return srv.(WorkerServer).Start(ctx, req.(*StartResp))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -197,16 +197,16 @@ func _Worker_Stop_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Worker_Health_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Worker_ObserverChangeState_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(WorkerServer).Health(m, &grpc.GenericServerStream[Empty, HealthResp]{ServerStream: stream})
+	return srv.(WorkerServer).ObserverChangeState(m, &grpc.GenericServerStream[Empty, StatusInfo]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Worker_HealthServer = grpc.ServerStreamingServer[HealthResp]
+type Worker_ObserverChangeStateServer = grpc.ServerStreamingServer[StatusInfo]
 
 // Worker_ServiceDesc is the grpc.ServiceDesc for Worker service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -230,8 +230,8 @@ var Worker_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Health",
-			Handler:       _Worker_Health_Handler,
+			StreamName:    "ObserverChangeState",
+			Handler:       _Worker_ObserverChangeState_Handler,
 			ServerStreams: true,
 		},
 	},

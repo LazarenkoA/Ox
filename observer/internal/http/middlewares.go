@@ -32,6 +32,11 @@ func loggingMiddleware(logger *slog.Logger) func(next http.Handler) http.Handler
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.String() == "/api/v1/ws" { // исключение для ws
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			start := time.Now()
 			logger.DebugContext(r.Context(), fmt.Sprintf("HTTP request started (method: %s, url: %s)", r.Method, r.URL.String()))
 
@@ -60,4 +65,18 @@ func loggingMiddleware(logger *slog.Logger) func(next http.Handler) http.Handler
 func (lw *loggingResponseWriter) WriteHeader(statusCode int) {
 	lw.status = statusCode
 	lw.ResponseWriter.WriteHeader(statusCode)
+}
+
+func sendWorkersStatus(workers IObserver) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r)
+
+			// после первого подключения ws отправляем статус по workers
+			for _, worker := range workers.Workers() {
+				worker.ChangeState(worker.Status)
+			}
+		})
+	}
 }

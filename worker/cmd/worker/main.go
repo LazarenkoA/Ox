@@ -4,12 +4,15 @@ package main
 import (
 	"context"
 	"github.com/alecthomas/kingpin/v2"
+	"github.com/pterm/pterm"
 	"load_testing/worker/grpc"
 	"load_testing/worker/internal/app"
+	"load_testing/worker/internal/utils"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 //go:generate protoc  --proto_path=../../proto --go_out=../../proto --go-grpc_out=../../proto worker.proto
@@ -35,9 +38,17 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	go shutdown(cancel)
 
-	err := grpc.NewGRPCServer(ctx, port, app.NewWorker())
+	worker := app.NewWorker()
+	if err := worker.Init(ctx); err != nil {
+		pterm.Fatal.WithFatal(true).Println(err.Error())
+	}
+
+	time.AfterFunc(time.Second, func() {
+		pterm.Info.Printf("worker запущен на порту %d", port)
+	})
+	err := grpc.NewGRPCServer(ctx, port, worker)
 	if err != nil {
-		log.Fatal(err)
+		pterm.Fatal.WithFatal(true).Println(err.Error())
 	}
 }
 
@@ -47,6 +58,6 @@ func shutdown(cancel context.CancelFunc) {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
 
-	log.Println("shutting down")
+	utils.Logger().Info("shutting down")
 	cancel()
 }

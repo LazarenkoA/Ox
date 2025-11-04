@@ -4,19 +4,17 @@ option go_package = "./gen";
 
 service Worker {
   rpc SetTestScript(SetTestScriptReq) returns(Empty) {}
-  rpc Start(Empty) returns(StartResp) {}
+  rpc Start(StartResp) returns(Empty) {}
   rpc Stop(Empty) returns(Empty) {}
-  rpc Health(Empty) returns(stream HealthResp) {}
+  rpc ObserverChangeState(Empty) returns(stream StatusInfo) {}
 }
 
-message HealthResp {
+message StatusInfo {
   WorkerStatus status = 4;
 }
 
 message StartResp {
-  string host = 1;
-  string ip = 2;
-  int32 port = 3;
+  int32 test_count = 4;
 }
 
 message SetTestScriptReq {
@@ -27,8 +25,9 @@ message Empty {
 }
 
 enum WorkerStatus {
-  READY = 0;
-  DONE = 1;
-  ERROR = 2;
+  STATE_UNSPECIFIED = 0;
+  STATE_READY = 1;
+  STATE_RUNNING = 2;
+  STATE_ERROR = 3;
 }
 

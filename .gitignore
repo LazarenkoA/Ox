@@ -8,6 +8,8 @@
 *.so
 *.dylib
 .idea
+playwright
+*.log
 
 # Test binary, built with `go test -c`
 *.test
@@ -31,3 +33,11 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

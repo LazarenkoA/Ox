@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Load Testing Control Panel</title>
     <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" href="static/favicon.ico" />
 </head>
 <body>
     <!-- Header Section -->
@@ -12,10 +13,6 @@
         <div class="header-content">
             <div class="header-left">
                 <h1 class="title">Панель управление нагрузочным тестом</h1>
-                <div class="global-status" id="globalStatus">
-                    <span class="status-dot status-ready"></span>
-                    <!-- <span class="status-text">System Ready</span>-->
-                </div>
             </div>
             <div class="header-right">
                 <div class="workers-count">
@@ -23,7 +20,7 @@
                     <span class="count-value" id="totalWorkers">{{ len .Workers }}</span>
                 </div>
                 <div class="master-controls">
-                    <button class="btn btn-success btn-large" id="startAllBtn">
+                    <button class="btn btn-success btn-large" id="startAllBtn" disabled>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
                         </svg>
@@ -58,12 +55,12 @@
                     </svg>
                 </button>
             </div>
-            <div class="parallel-config-content" id="parallelConfigContent">
+            <div class="parallel-config-content collapsed" id="parallelConfigContent">
                 <!-- Batch Apply Tab -->
                 <div class="config-tab-content.active" id="batchTab-">
                     <div class="batch-apply-container">
                         <div class="form-group">
-                            <label class="form-label">Установите параллельные тесты для всех воркеров</label>
+                            <label class="form-label">Установите количество параллельных тестов на каждом воркере</label>
                             <div class="batch-apply-controls">
                                 <input type="number" id="batchParallelInput" class="form-input" min="1" max="1000" value="20" placeholder="Enter value...">
                                 <button class="btn btn-primary" id="applyToAllBtn">
@@ -107,8 +104,8 @@
             </div>
             <div class="script-content" id="scriptContent">
                 <div class="script-tabs">
-                    <button class="tab-btn active" data-tab="individual">Individual</button>
-                    <button class="tab-btn" data-tab="batch">Batch Deploy</button>
+                    <button class="tab-btn active" data-tab="individual">Индивидуальный</button>
+                    <button class="tab-btn" data-tab="batch">Пакетное развертывание</button>
                 </div>
 
                 <!-- Individual Mode -->
@@ -121,15 +118,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">JavaScript Test Script</label>
-                        <textarea class="code-editor" id="individualScript" rows="12" placeholder="Enter your test script...">// Sample Load Test Script
-export default function() {
-  const response = http.get('https://api.example.com/endpoint');
-  check(response, {
-    'status is 200': (r) =&gt; r.status === 200,
-    'response time &lt; 500ms': (r) =&gt; r.timings.duration &lt; 500
-  });
-  sleep(1);
-}</textarea>
+                        <textarea class="code-editor" id="individualScript" rows="12" placeholder="Enter your test script...">// Вставить скрипт сюда</textarea>
                     </div>
                     <button class="btn btn-primary" id="deployIndividualBtn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -157,15 +146,8 @@ export default function() {
                     </div>
                     <div class="form-group">
                         <label class="form-label">JavaScript Test Script</label>
-                        <textarea class="code-editor" id="batchScript" rows="12" placeholder="Enter your test script...">// Sample Load Test Script
-export default function() {
-  const response = http.get('https://api.example.com/endpoint');
-  check(response, {
-    'status is 200': (r) =&gt; r.status === 200,
-    'response time &lt; 500ms': (r) =&gt; r.timings.duration &lt; 500
-  });
-  sleep(1);
-}</textarea>
+                        <textarea class="code-editor" id="batchScript" rows="12" placeholder="Enter your test script...">// Вставить скрипт сюда
+                        </textarea>
                     </div>
                     <button class="btn btn-primary" id="deployBatchBtn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -179,34 +161,6 @@ export default function() {
             </div>
         </section>
 
-        <!-- Status Bar -->
-        <section class="status-bar">
-            <div class="status-metrics">
-                <div class="metric-card">
-                    <div class="metric-label">Total Requests</div>
-                    <div class="metric-value" id="totalRequests">0</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Avg Response Time</div>
-                    <div class="metric-value" id="avgResponseTime">0 ms</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Error Rate</div>
-                    <div class="metric-value" id="errorRate">0%</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Test Duration</div>
-                    <div class="metric-value" id="testDuration">00:00:00</div>
-                </div>
-                <div class="metric-card connection-status">
-                    <div class="metric-label">Observer Connection</div>
-                    <div class="connection-indicator">
-                        <span class="status-dot status-ready"></span>
-                        <span class="connection-text">Connected</span>
-                    </div>
-                </div>
-            </div>
-        </section>
     </div>
 
     <!-- Modal -->
@@ -217,11 +171,11 @@ export default function() {
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
             <div class="modal-body" id="modalBody">
-                Are you sure you want to proceed?
+                Хотите продолжить?
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="modalCancel">Cancel</button>
-                <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+                <button class="btn btn-secondary" id="modalCancel">Отмена</button>
+                <button class="btn btn-primary" id="modalConfirm">Продолжить</button>
             </div>
         </div>
     </div>

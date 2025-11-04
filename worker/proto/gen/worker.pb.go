@@ -24,22 +24,25 @@ const (
 type WorkerStatus int32
 
 const (
-	WorkerStatus_READY WorkerStatus = 0
-	WorkerStatus_DONE  WorkerStatus = 1
-	WorkerStatus_ERROR WorkerStatus = 2
+	WorkerStatus_STATE_UNSPECIFIED WorkerStatus = 0
+	WorkerStatus_STATE_READY       WorkerStatus = 1
+	WorkerStatus_STATE_RUNNING     WorkerStatus = 2
+	WorkerStatus_STATE_ERROR       WorkerStatus = 3
 )
 
 // Enum value maps for WorkerStatus.
 var (
 	WorkerStatus_name = map[int32]string{
-		0: "READY",
-		1: "DONE",
-		2: "ERROR",
+		0: "STATE_UNSPECIFIED",
+		1: "STATE_READY",
+		2: "STATE_RUNNING",
+		3: "STATE_ERROR",
 	}
 	WorkerStatus_value = map[string]int32{
-		"READY": 0,
-		"DONE":  1,
-		"ERROR": 2,
+		"STATE_UNSPECIFIED": 0,
+		"STATE_READY":       1,
+		"STATE_RUNNING":     2,
+		"STATE_ERROR":       3,
 	}
 )
 
@@ -70,27 +73,27 @@ func (WorkerStatus) EnumDescriptor() ([]byte, []int) {
 	return file_worker_proto_rawDescGZIP(), []int{0}
 }
 
-type HealthResp struct {
+type StatusInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        WorkerStatus           `protobuf:"varint,4,opt,name=status,proto3,enum=WorkerStatus" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *HealthResp) Reset() {
-	*x = HealthResp{}
+func (x *StatusInfo) Reset() {
+	*x = StatusInfo{}
 	mi := &file_worker_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *HealthResp) String() string {
+func (x *StatusInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HealthResp) ProtoMessage() {}
+func (*StatusInfo) ProtoMessage() {}
 
-func (x *HealthResp) ProtoReflect() protoreflect.Message {
+func (x *StatusInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_worker_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -102,23 +105,21 @@ func (x *HealthResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HealthResp.ProtoReflect.Descriptor instead.
-func (*HealthResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use StatusInfo.ProtoReflect.Descriptor instead.
+func (*StatusInfo) Descriptor() ([]byte, []int) {
 	return file_worker_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *HealthResp) GetStatus() WorkerStatus {
+func (x *StatusInfo) GetStatus() WorkerStatus {
 	if x != nil {
 		return x.Status
 	}
-	return WorkerStatus_READY
+	return WorkerStatus_STATE_UNSPECIFIED
 }
 
 type StartResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Host          string                 `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
-	Ip            string                 `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
-	Port          int32                  `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
+	TestCount     int32                  `protobuf:"varint,4,opt,name=test_count,json=testCount,proto3" json:"test_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -153,23 +154,9 @@ func (*StartResp) Descriptor() ([]byte, []int) {
 	return file_worker_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *StartResp) GetHost() string {
+func (x *StartResp) GetTestCount() int32 {
 	if x != nil {
-		return x.Host
-	}
-	return ""
-}
-
-func (x *StartResp) GetIp() string {
-	if x != nil {
-		return x.Ip
-	}
-	return ""
-}
-
-func (x *StartResp) GetPort() int32 {
-	if x != nil {
-		return x.Port
+		return x.TestCount
 	}
 	return 0
 }
@@ -260,25 +247,25 @@ const file_worker_proto_rawDesc = "" +
 	"\n" +
 	"\fworker.proto\"3\n" +
 	"\n" +
-	"HealthResp\x12%\n" +
-	"\x06status\x18\x04 \x01(\x0e2\r.WorkerStatusR\x06status\"C\n" +
-	"\tStartResp\x12\x12\n" +
-	"\x04host\x18\x01 \x01(\tR\x04host\x12\x0e\n" +
-	"\x02ip\x18\x02 \x01(\tR\x02ip\x12\x12\n" +
-	"\x04port\x18\x03 \x01(\x05R\x04port\"*\n" +
+	"StatusInfo\x12%\n" +
+	"\x06status\x18\x04 \x01(\x0e2\r.WorkerStatusR\x06status\"*\n" +
+	"\tStartResp\x12\x1d\n" +
+	"\n" +
+	"test_count\x18\x04 \x01(\x05R\ttestCount\"*\n" +
 	"\x10SetTestScriptReq\x12\x16\n" +
 	"\x06script\x18\x01 \x01(\tR\x06script\"\a\n" +
-	"\x05Empty*.\n" +
-	"\fWorkerStatus\x12\t\n" +
-	"\x05READY\x10\x00\x12\b\n" +
-	"\x04DONE\x10\x01\x12\t\n" +
-	"\x05ERROR\x10\x022\x92\x01\n" +
+	"\x05Empty*Z\n" +
+	"\fWorkerStatus\x12\x15\n" +
+	"\x11STATE_UNSPECIFIED\x10\x00\x12\x0f\n" +
+	"\vSTATE_READY\x10\x01\x12\x11\n" +
+	"\rSTATE_RUNNING\x10\x02\x12\x0f\n" +
+	"\vSTATE_ERROR\x10\x032\x9f\x01\n" +
 	"\x06Worker\x12,\n" +
 	"\rSetTestScript\x12\x11.SetTestScriptReq\x1a\x06.Empty\"\x00\x12\x1d\n" +
-	"\x05Start\x12\x06.Empty\x1a\n" +
-	".StartResp\"\x00\x12\x18\n" +
-	"\x04Stop\x12\x06.Empty\x1a\x06.Empty\"\x00\x12!\n" +
-	"\x06Health\x12\x06.Empty\x1a\v.HealthResp\"\x000\x01B\aZ\x05./genb\x06proto3"
+	"\x05Start\x12\n" +
+	".StartResp\x1a\x06.Empty\"\x00\x12\x18\n" +
+	"\x04Stop\x12\x06.Empty\x1a\x06.Empty\"\x00\x12.\n" +
+	"\x13ObserverChangeState\x12\x06.Empty\x1a\v.StatusInfo\"\x000\x01B\aZ\x05./genb\x06proto3"
 
 var (
 	file_worker_proto_rawDescOnce sync.Once
@@ -296,21 +283,21 @@ var file_worker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_worker_proto_goTypes = []any{
 	(WorkerStatus)(0),        // 0: WorkerStatus
-	(*HealthResp)(nil),       // 1: HealthResp
+	(*StatusInfo)(nil),       // 1: StatusInfo
 	(*StartResp)(nil),        // 2: StartResp
 	(*SetTestScriptReq)(nil), // 3: SetTestScriptReq
 	(*Empty)(nil),            // 4: Empty
 }
 var file_worker_proto_depIdxs = []int32{
-	0, // 0: HealthResp.status:type_name -> WorkerStatus
+	0, // 0: StatusInfo.status:type_name -> WorkerStatus
 	3, // 1: Worker.SetTestScript:input_type -> SetTestScriptReq
-	4, // 2: Worker.Start:input_type -> Empty
+	2, // 2: Worker.Start:input_type -> StartResp
 	4, // 3: Worker.Stop:input_type -> Empty
-	4, // 4: Worker.Health:input_type -> Empty
+	4, // 4: Worker.ObserverChangeState:input_type -> Empty
 	4, // 5: Worker.SetTestScript:output_type -> Empty
-	2, // 6: Worker.Start:output_type -> StartResp
+	4, // 6: Worker.Start:output_type -> Empty
 	4, // 7: Worker.Stop:output_type -> Empty
-	1, // 8: Worker.Health:output_type -> HealthResp
+	1, // 8: Worker.ObserverChangeState:output_type -> StatusInfo
 	5, // [5:9] is the sub-list for method output_type
 	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

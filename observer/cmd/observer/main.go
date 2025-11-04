@@ -3,12 +3,9 @@ package main
 import (
 	"context"
 	"github.com/alecthomas/kingpin/v2"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/backoff"
-	"google.golang.org/grpc/credentials/insecure"
+	"load_testing/observer/internal/app"
 	"load_testing/observer/internal/config"
 	"load_testing/observer/internal/http"
-	"load_testing/worker/proto/gen"
 	"log"
 	"os"
 	"os/signal"
@@ -35,61 +32,24 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go shutdown(cancel)
-	go grpcStart(ctx, cfg.Workers)
 
 	go func() {
 		time.Sleep(time.Millisecond * 300)
 		//utils.OpenBrowser(fmt.Sprintf("http://localhost:%d", cfg.Port))
 	}()
 
-	srv, err := http.NewHTTP(cfg.Port, cfg.Workers)
-	if err != nil {
-		log.Fatal(err)
-	}
+	srv := http.NewHTTP(cfg.Port)
+	observ := app.NewObserver(srv, cfg.Workers)
+	err = srv.InitRouts(observ)
+	check(err)
 
-	err = srv.Run(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	go observ.Run(ctx)
+	check(srv.Run(ctx))
 }
 
-func grpcStart(ctx context.Context, workers []config.WorkerConfig) {
-	params := grpc.ConnectParams{
-		Backoff: backoff.Config{
-			BaseDelay:  1 * time.Second,
-			Multiplier: 1.6,
-			MaxDelay:   10 * time.Second,
-		},
-		MinConnectTimeout: 5 * time.Second,
-	}
-
-	withTransport := grpc.WithTransportCredentials(insecure.NewCredentials())
-	conn, err := grpc.NewClient(":63546", withTransport, grpc.WithConnectParams(params))
+func check(err error) {
 	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer conn.Close()
-
-	client := gen.NewWorkerClient(conn)
-
-	for {
-		stream, err := client.Health(context.Background(), &gen.Empty{})
-		if err != nil {
-			log.Println(err)
-			time.Sleep(time.Second)
-			continue
-		}
-
-		for {
-			msg, err := stream.Recv()
-			if err == nil {
-				log.Println(msg.Status)
-			} else {
-				log.Println("ERROR:", err)
-				break
-			}
-		}
+		log.Fatal(err)
 	}
 }
 
