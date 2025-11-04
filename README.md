@@ -17,7 +17,7 @@
 - [Быстрый старт](#быстрый-старт)
 - [Создание тестовых сценариев](#создание-тестовых-сценариев)
 - [Отладка и диагностика](#отладка-и-диагностика)
-- [Документация](#документация)
+- [Видео](#видео)
 
 ## Введение
 
@@ -170,6 +170,10 @@ npx playwright codegen http://localhost/bsp/ru_RU/
 
 Выполняйте действия в браузере, они автоматически записываются как код.
 
+Видео пример:
+
+https://github.com/user-attachments/assets/a47ae493-ccd2-46e6-b2b6-e3e931cc7c02
+
 ### Пример сгенерированного сценария
 
 ```javascript
@@ -193,10 +197,11 @@ test('create_survey_template', async ({ page }) => {
     // Создание нового элемента
     await page.locator('[id="form4_ФормаСоздать"]').click();
     
-    const templateName = randomString();
+    const name = randomString();
     await page.getByRole('textbox', { name: 'Наименование:' })
-        .pressSequentially(templateName);
-    
+        .pressSequentially(name);
+
+    await page.locator('[id="form5_Заголовок"] > .inputs').click();
     await page.locator('[id="form5_Заголовок"] > .inputs')
         .pressSequentially(randomString());
     
@@ -205,7 +210,7 @@ test('create_survey_template', async ({ page }) => {
     
     // Удаление созданного элемента
     await page.locator('[id="grid_form4_Список"]')
-        .getByText(templateName, { exact: true })
+        .getByText(name, { exact: true })
         .click({ button: 'right' });
     
     await page.locator('#popupItem4')
@@ -290,12 +295,9 @@ npx playwright test ./tests/bsp.spec.js --project=chromium --ui
 - **ERROR** — тест завершился с ошибкой (см. логи)
 - **OFFLINE** — worker недоступен (проверьте сетевое соединение)
 
-## Документация
+### Видео работы
+https://github.com/user-attachments/assets/6b5f548f-06bd-4ad5-a199-10ccb4ecf539
 
-- [Playwright Documentation](https://playwright.dev/)
-- [1C Web Client Documentation](https://its.1c.eu/db/v8314doc)
-- [Структура проекта](docs/ARCHITECTURE.md)
-- [Примеры сценариев](examples/)
 
 ## Диагностика проблем
 
