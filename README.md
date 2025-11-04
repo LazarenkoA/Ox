@@ -171,6 +171,7 @@ npx playwright codegen http://localhost/bsp/ru_RU/
 Выполняйте действия в браузере, они автоматически записываются как код.
 
 Видео пример:
+
 https://github.com/user-attachments/assets/b2bc618b-2997-4a6a-8c19-d70043e9eeb3
 
 
