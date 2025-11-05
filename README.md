@@ -230,6 +230,10 @@ function randomString() {
 
 другие примеры можно посмотреть в каталоге [example scripts](example%20scripts)
 
+пример проверки скрипта
+
+https://github.com/user-attachments/assets/4812d2cf-7e5f-4105-807b-cae369f48c13
+
 ### Рекомендации при редактировании сценариев
 
 1. **Используйте `.pressSequentially()` вместо `.fill()`** — для элементов с автодополнением и валидацией

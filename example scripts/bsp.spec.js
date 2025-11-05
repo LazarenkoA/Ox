@@ -12,7 +12,7 @@ test('test', async ({ page }) => {
     await page.locator('#cmd_0_6_txt').click();
     await page.locator('div:nth-child(4) > div:nth-child(2) > .gridBoxTitle').click();
     await page.getByText('АОЗТ Лабан').dblclick();
-    await page.locator('[id="form5_ФормаЗаписатьИЗакрыть"]').click();
+    await closeButton(page, 'ФормаЗаписатьИЗакрыть')
     await page.locator('[id="form4_ФормаСоздать"]').click();
     await page.getByRole('textbox', { name: 'Наименование:' }).click();
 
@@ -26,7 +26,8 @@ test('test', async ({ page }) => {
     await page.getByText('Демо: КонтрагентыБез партнера').click();
     await page.locator('[id="grid_form7_Список"]').getByText('Без партнера').click();
     await page.locator('[id="form7_ФормаВыбрать"]').click();
-    await page.locator('a[id $= "ФормаЗаписатьИЗакрыть"]').click();
+    await closeButton(page, 'ФормаЗаписатьИЗакрыть')
+
     // Содержит подстроку
     // [id*="ФормаЗаписатьИЗакрыть"]
     // Заканчивается на
@@ -43,9 +44,9 @@ test('test', async ({ page }) => {
     await page.locator('#cmd_0_6_txt').click();
 
     // клик по строке в списке
-    page.locator('div.gridLine').last().dblclick();
+    await page.locator('div.gridLine').last().dblclick();
+    await closeButton(page, 'ФормаПровестиИЗакрыть')
 
-    await page.locator('a[id^="form"][id$="_ФормаПровестиИЗакрыть"]').click();
     await page.locator('a[id^="form"][id$="_ФормаСоздать"]').last().click();
     await page.locator('[id^="form"][id$="_Организация_DLB"]').click();
     await page.getByText('Показать все').first().click();
@@ -56,17 +57,21 @@ test('test', async ({ page }) => {
     await page.getByText('Показать все').first().click();
     await page.locator('[id^="grid_form"][id$="_Список"]').last().getByText('ООО "Альфа"').dblclick();
 
-    const elems = await page.locator('[id$="_ФормаПровестиИЗакрыть"]').elementHandles();
-    for (const btn of elems) {
-        const id = await btn.evaluate(el => el.id);
-        if (/^form\d+_ФормаПровестиИЗакрыть$/.test(id)) {
-            await btn.click();
-            break; // кликнули первый подходящий
-        }
-    }
-
+    await closeButton(page, 'ФормаПровестиИЗакрыть')
 });
 
 function randomString() {
     return Math.random().toString(36).substring(2, 10);
+}
+
+async function closeButton(page, name) {
+    const elems = await page.locator(`[id$="_${name}"]`).elementHandles();
+
+    for (const btn of elems) {
+        const id = await btn.evaluate(el => el.id);
+        if (new RegExp(`^form\\d+_${name}$`).test(id)) {
+            await btn.click();
+            break; // кликнули первый подходящий
+        }
+    }
 }
