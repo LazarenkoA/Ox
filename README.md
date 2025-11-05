@@ -172,7 +172,7 @@ npx playwright codegen http://localhost/bsp/ru_RU/
 
 Видео пример:
 
-https://github.com/user-attachments/assets/b2bc618b-2997-4a6a-8c19-d70043e9eeb3
+https://github.com/user-attachments/assets/a47ae493-ccd2-46e6-b2b6-e3e931cc7c02
 
 
 ### Пример сгенерированного сценария
