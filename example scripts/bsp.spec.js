@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('test', async ({ page }) => {
+test('Тест БСП', async ({ page }) => {
     await page.goto('http://localhost/bsp/ru_RU/');
     await page.locator('#userName').click();
     await page.locator('#userName').fill('Администратор');
@@ -47,6 +47,7 @@ test('test', async ({ page }) => {
     await page.locator('div.gridLine').last().dblclick();
     await closeButton(page, 'ФормаПровестиИЗакрыть')
 
+    // создать документ
     await page.locator('a[id^="form"][id$="_ФормаСоздать"]').last().click();
     await page.locator('[id^="form"][id$="_Организация_DLB"]').click();
     await page.getByText('Показать все').first().click();
@@ -58,6 +59,16 @@ test('test', async ({ page }) => {
     await page.locator('[id^="grid_form"][id$="_Список"]').last().getByText('ООО "Альфа"').dblclick();
 
     await closeButton(page, 'ФормаПровестиИЗакрыть')
+
+    // отчет
+    await page.locator('#themesCell_theme_11').getByText('Администрирование').click();
+    await page.getByText('Отчеты администратора').click();
+    await page.getByText('Анализ активности пользователей').click();
+    await page.locator('[id^="form"][id$="_КомпоновщикНастроекПользовательскиеНастройкиЭлемент0Значение_CB"]').last().click();
+    await page.locator('[id^="grid_form"][id$="_ПользователиСписок"]').last().getByText('Петрищев Олег Константинович (руководитель)').dblclick();
+    await page.locator('a').filter({ hasText: 'Подобрать и закрыть' }).click();
+    await page.locator('[id^="form"][id$="_СформироватьОтчет"]').last().click();
+    await page.locator('[id^="VW_page"][id$="headerTopLine_cmd_CloseButton"]').last().click();
 });
 
 function randomString() {
