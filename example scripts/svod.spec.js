@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('Тест свод отчетов', async ({ page }) => {
     test.setTimeout(100_000); // секунд только для этого теста
 
-    await page.goto('https://digital.zo.gov.ru/sko/ru/');
+    await page.goto('https://localhost/sko/ru/');
     await page.locator('#userName').click();
     await page.locator('#userName').fill('АдминистраторП');
     await page.locator('.authPassInput').first().click();
