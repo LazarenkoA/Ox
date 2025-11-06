@@ -5,10 +5,10 @@ test('Тест свод отчетов', async ({ page }) => {
 
     await page.goto('https://localhost/sko/ru/');
     await page.locator('#userName').click();
-    await page.locator('#userName').fill('АдминистраторП');
+    await page.locator('#userName').fill('Администратор');
     await page.locator('.authPassInput').first().click();
     await page.locator('#userPassword').click();
-    await page.locator('#userPassword').fill('Ho0de3vi');
+    await page.locator('#userPassword').fill('Hi');
     await page.getByRole('button', { name: 'Войти' }).click();
 
     await page.getByText('Ф. 0503737').nth(2).dblclick();
