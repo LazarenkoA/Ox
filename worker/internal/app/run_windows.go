@@ -15,7 +15,7 @@ func (w *Worker) stopProcess(ctx context.Context, cmd *exec.Cmd) {
 
 	go func() {
 		<-ctx.Done()
-		w.logger.WarnContext(ctx, "context canceled -> terminating process group")
+		//w.logger.WarnContext(ctx, "context canceled -> terminating process group")
 
 		// Отправляем Ctrl-Break всей группе процессов
 		_ = windows.GenerateConsoleCtrlEvent(syscall.CTRL_BREAK_EVENT, uint32(cmd.Process.Pid))

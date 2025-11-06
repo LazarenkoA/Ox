@@ -161,27 +161,27 @@ func (x *StartResp) GetTestCount() int32 {
 	return 0
 }
 
-type SetTestScriptReq struct {
+type TestScript struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Script        string                 `protobuf:"bytes,1,opt,name=script,proto3" json:"script,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SetTestScriptReq) Reset() {
-	*x = SetTestScriptReq{}
+func (x *TestScript) Reset() {
+	*x = TestScript{}
 	mi := &file_worker_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SetTestScriptReq) String() string {
+func (x *TestScript) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SetTestScriptReq) ProtoMessage() {}
+func (*TestScript) ProtoMessage() {}
 
-func (x *SetTestScriptReq) ProtoReflect() protoreflect.Message {
+func (x *TestScript) ProtoReflect() protoreflect.Message {
 	mi := &file_worker_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -193,12 +193,12 @@ func (x *SetTestScriptReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SetTestScriptReq.ProtoReflect.Descriptor instead.
-func (*SetTestScriptReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use TestScript.ProtoReflect.Descriptor instead.
+func (*TestScript) Descriptor() ([]byte, []int) {
 	return file_worker_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SetTestScriptReq) GetScript() string {
+func (x *TestScript) GetScript() string {
 	if x != nil {
 		return x.Script
 	}
@@ -251,17 +251,19 @@ const file_worker_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\x0e2\r.WorkerStatusR\x06status\"*\n" +
 	"\tStartResp\x12\x1d\n" +
 	"\n" +
-	"test_count\x18\x04 \x01(\x05R\ttestCount\"*\n" +
-	"\x10SetTestScriptReq\x12\x16\n" +
+	"test_count\x18\x04 \x01(\x05R\ttestCount\"$\n" +
+	"\n" +
+	"TestScript\x12\x16\n" +
 	"\x06script\x18\x01 \x01(\tR\x06script\"\a\n" +
 	"\x05Empty*Z\n" +
 	"\fWorkerStatus\x12\x15\n" +
 	"\x11STATE_UNSPECIFIED\x10\x00\x12\x0f\n" +
 	"\vSTATE_READY\x10\x01\x12\x11\n" +
 	"\rSTATE_RUNNING\x10\x02\x12\x0f\n" +
-	"\vSTATE_ERROR\x10\x032\x9f\x01\n" +
-	"\x06Worker\x12,\n" +
-	"\rSetTestScript\x12\x11.SetTestScriptReq\x1a\x06.Empty\"\x00\x12\x1d\n" +
+	"\vSTATE_ERROR\x10\x032\xc1\x01\n" +
+	"\x06Worker\x12&\n" +
+	"\rSetTestScript\x12\v.TestScript\x1a\x06.Empty\"\x00\x12&\n" +
+	"\rGetTestScript\x12\x06.Empty\x1a\v.TestScript\"\x00\x12\x1d\n" +
 	"\x05Start\x12\n" +
 	".StartResp\x1a\x06.Empty\"\x00\x12\x18\n" +
 	"\x04Stop\x12\x06.Empty\x1a\x06.Empty\"\x00\x12.\n" +
@@ -282,24 +284,26 @@ func file_worker_proto_rawDescGZIP() []byte {
 var file_worker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_worker_proto_goTypes = []any{
-	(WorkerStatus)(0),        // 0: WorkerStatus
-	(*StatusInfo)(nil),       // 1: StatusInfo
-	(*StartResp)(nil),        // 2: StartResp
-	(*SetTestScriptReq)(nil), // 3: SetTestScriptReq
-	(*Empty)(nil),            // 4: Empty
+	(WorkerStatus)(0),  // 0: WorkerStatus
+	(*StatusInfo)(nil), // 1: StatusInfo
+	(*StartResp)(nil),  // 2: StartResp
+	(*TestScript)(nil), // 3: TestScript
+	(*Empty)(nil),      // 4: Empty
 }
 var file_worker_proto_depIdxs = []int32{
 	0, // 0: StatusInfo.status:type_name -> WorkerStatus
-	3, // 1: Worker.SetTestScript:input_type -> SetTestScriptReq
-	2, // 2: Worker.Start:input_type -> StartResp
-	4, // 3: Worker.Stop:input_type -> Empty
-	4, // 4: Worker.ObserverChangeState:input_type -> Empty
-	4, // 5: Worker.SetTestScript:output_type -> Empty
-	4, // 6: Worker.Start:output_type -> Empty
-	4, // 7: Worker.Stop:output_type -> Empty
-	1, // 8: Worker.ObserverChangeState:output_type -> StatusInfo
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
+	3, // 1: Worker.SetTestScript:input_type -> TestScript
+	4, // 2: Worker.GetTestScript:input_type -> Empty
+	2, // 3: Worker.Start:input_type -> StartResp
+	4, // 4: Worker.Stop:input_type -> Empty
+	4, // 5: Worker.ObserverChangeState:input_type -> Empty
+	4, // 6: Worker.SetTestScript:output_type -> Empty
+	3, // 7: Worker.GetTestScript:output_type -> TestScript
+	4, // 8: Worker.Start:output_type -> Empty
+	4, // 9: Worker.Stop:output_type -> Empty
+	1, // 10: Worker.ObserverChangeState:output_type -> StatusInfo
+	6, // [6:11] is the sub-list for method output_type
+	1, // [1:6] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name

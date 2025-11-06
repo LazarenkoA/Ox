@@ -22,7 +22,7 @@ type Worker struct {
 	ParallelTests int              `json:"parallel_tests"`
 	ws            WS               `json:"-"`
 	client        gen.WorkerClient `json:"-"`
-	mx            sync.Mutex       `json:"-"`
+	mx            sync.RWMutex     `json:"-"`
 }
 
 func (w *Worker) ChangeState(newState state) {
@@ -30,7 +30,10 @@ func (w *Worker) ChangeState(newState state) {
 	defer w.mx.Unlock()
 
 	w.Status = newState
+	w.sendWorkerToFront()
+}
 
+func (w *Worker) sendWorkerToFront() {
 	data, _ := json.Marshal(w)
 	if err := w.ws.WriteWSMessage(string(data)); err != nil {
 		log.Println("WriteWSMessage error:", err)
@@ -64,8 +67,11 @@ func (w *Worker) Stop() error {
 }
 
 func (w *Worker) SetTestScript(script string) error {
+	w.mx.Lock()
+	defer w.mx.Unlock()
+
 	w.Script = script
-	_, err := w.client.SetTestScript(context.Background(), &gen.SetTestScriptReq{Script: script})
+	_, err := w.client.SetTestScript(context.Background(), &gen.TestScript{Script: script})
 	return err
 }
 
@@ -90,15 +96,32 @@ func (w *Worker) grpcStart(ctx context.Context, chanStatus chan<- WorkerStatus) 
 	defer conn.Close()
 
 	w.client = gen.NewWorkerClient(conn)
-	w.grpcKeepalive(ctx, w.client, chanStatus)
+	w.grpcKeepalive(ctx, chanStatus)
 }
 
-func (w *Worker) grpcKeepalive(ctx context.Context, client gen.WorkerClient, chanStatus chan<- WorkerStatus) {
+func (w *Worker) syncScript(ctx context.Context) {
+	w.mx.Lock()
+	defer w.mx.Unlock()
+
+	if w.Script == "" {
+		if script, err := w.client.GetTestScript(ctx, &gen.Empty{}); err == nil {
+			w.Script = script.Script
+		}
+	} else {
+		_, _ = w.client.SetTestScript(ctx, &gen.TestScript{Script: w.Script})
+	}
+}
+
+func (w *Worker) grpcKeepalive(ctx context.Context, chanStatus chan<- WorkerStatus) {
 	for {
-		stream, err := client.ObserverChangeState(ctx, &gen.Empty{})
+		stream, err := w.client.ObserverChangeState(ctx, &gen.Empty{})
 		if err != nil {
 			log.Println("GRPC error:", err)
 		} else {
+			// сразу при подключении синкаем скрипт потому что мог быть перезагружен воркер тогда мы скрипт отдает
+			// а мог быть перезагружен observer тогда мы скрипт забираем
+			w.syncScript(ctx)
+
 			chanStatus <- WorkerStatus{workerID: w.Id, status: gen.WorkerStatus_STATE_READY}
 			w.readStream(stream, w.Id, chanStatus)
 		}

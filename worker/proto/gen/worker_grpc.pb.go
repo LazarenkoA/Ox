@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Worker_SetTestScript_FullMethodName       = "/Worker/SetTestScript"
+	Worker_GetTestScript_FullMethodName       = "/Worker/GetTestScript"
 	Worker_Start_FullMethodName               = "/Worker/Start"
 	Worker_Stop_FullMethodName                = "/Worker/Stop"
 	Worker_ObserverChangeState_FullMethodName = "/Worker/ObserverChangeState"
@@ -29,7 +30,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
-	SetTestScript(ctx context.Context, in *SetTestScriptReq, opts ...grpc.CallOption) (*Empty, error)
+	SetTestScript(ctx context.Context, in *TestScript, opts ...grpc.CallOption) (*Empty, error)
+	GetTestScript(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TestScript, error)
 	Start(ctx context.Context, in *StartResp, opts ...grpc.CallOption) (*Empty, error)
 	Stop(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	ObserverChangeState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StatusInfo], error)
@@ -43,10 +45,20 @@ func NewWorkerClient(cc grpc.ClientConnInterface) WorkerClient {
 	return &workerClient{cc}
 }
 
-func (c *workerClient) SetTestScript(ctx context.Context, in *SetTestScriptReq, opts ...grpc.CallOption) (*Empty, error) {
+func (c *workerClient) SetTestScript(ctx context.Context, in *TestScript, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, Worker_SetTestScript_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workerClient) GetTestScript(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TestScript, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TestScript)
+	err := c.cc.Invoke(ctx, Worker_GetTestScript_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +108,8 @@ type Worker_ObserverChangeStateClient = grpc.ServerStreamingClient[StatusInfo]
 // All implementations must embed UnimplementedWorkerServer
 // for forward compatibility.
 type WorkerServer interface {
-	SetTestScript(context.Context, *SetTestScriptReq) (*Empty, error)
+	SetTestScript(context.Context, *TestScript) (*Empty, error)
+	GetTestScript(context.Context, *Empty) (*TestScript, error)
 	Start(context.Context, *StartResp) (*Empty, error)
 	Stop(context.Context, *Empty) (*Empty, error)
 	ObserverChangeState(*Empty, grpc.ServerStreamingServer[StatusInfo]) error
@@ -110,8 +123,11 @@ type WorkerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedWorkerServer struct{}
 
-func (UnimplementedWorkerServer) SetTestScript(context.Context, *SetTestScriptReq) (*Empty, error) {
+func (UnimplementedWorkerServer) SetTestScript(context.Context, *TestScript) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetTestScript not implemented")
+}
+func (UnimplementedWorkerServer) GetTestScript(context.Context, *Empty) (*TestScript, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTestScript not implemented")
 }
 func (UnimplementedWorkerServer) Start(context.Context, *StartResp) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
@@ -144,7 +160,7 @@ func RegisterWorkerServer(s grpc.ServiceRegistrar, srv WorkerServer) {
 }
 
 func _Worker_SetTestScript_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetTestScriptReq)
+	in := new(TestScript)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -156,7 +172,25 @@ func _Worker_SetTestScript_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: Worker_SetTestScript_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkerServer).SetTestScript(ctx, req.(*SetTestScriptReq))
+		return srv.(WorkerServer).SetTestScript(ctx, req.(*TestScript))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Worker_GetTestScript_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkerServer).GetTestScript(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Worker_GetTestScript_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkerServer).GetTestScript(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -218,6 +252,10 @@ var Worker_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetTestScript",
 			Handler:    _Worker_SetTestScript_Handler,
+		},
+		{
+			MethodName: "GetTestScript",
+			Handler:    _Worker_GetTestScript_Handler,
 		},
 		{
 			MethodName: "Start",

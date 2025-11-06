@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 type Worker struct {
@@ -20,6 +21,7 @@ type Worker struct {
 	playwrightDir string
 	script        string
 	logger        *slog.Logger
+	mx            sync.RWMutex
 }
 
 func NewWorker() *Worker {
@@ -65,10 +67,19 @@ func dirExists(path string) bool {
 	return err == nil
 }
 
-func (w *Worker) SetTestScript(_ context.Context, req *gen.SetTestScriptReq) (*gen.Empty, error) {
-	w.script = req.Script
+func (w *Worker) SetTestScript(_ context.Context, req *gen.TestScript) (*gen.Empty, error) {
+	w.mx.Lock()
+	defer w.mx.Unlock()
 
+	w.script = req.Script
 	return new(gen.Empty), nil
+}
+
+func (w *Worker) GetTestScript(_ context.Context, _ *gen.Empty) (*gen.TestScript, error) {
+	w.mx.RLock()
+	defer w.mx.RUnlock()
+
+	return &gen.TestScript{Script: w.script}, nil
 }
 
 func (w *Worker) Start(ctxParent context.Context, resp *gen.StartResp) (_ *gen.Empty, err error) {

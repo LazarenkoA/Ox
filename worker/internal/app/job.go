@@ -2,20 +2,22 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
+	"github.com/samber/lo"
 	"github.com/sourcegraph/conc"
 )
 
 func (w *Worker) startJob(ctx context.Context, testCount int32) error {
 	w.logger.InfoContext(ctx, fmt.Sprintf("start worker, test count %d", testCount))
 
-	err := new(multierror.Error)
+	var err error
 	var wg conc.WaitGroup
 	for range testCount {
 		wg.Go(func() {
 			if e := w.runTest(ctx, w.playwrightDir); e != nil {
-				err = multierror.Append(err, e)
+				w.logger.ErrorContext(ctx, e.Error())
+				err = lo.If(err == nil, errors.New("one or more tests failed with an error")).Else(err)
 				return
 			}
 			w.logger.InfoContext(ctx, "test is pass")
@@ -23,5 +25,5 @@ func (w *Worker) startJob(ctx context.Context, testCount int32) error {
 	}
 
 	wg.Wait()
-	return err.ErrorOrNil()
+	return err
 }

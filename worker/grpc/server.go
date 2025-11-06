@@ -34,7 +34,7 @@ func NewGRPCServer(ctx context.Context, port int, worker gen.WorkerServer) error
 
 func logInterceptor(logger *slog.Logger) func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-		_, err = handler(ctx, req)
+		resp, err = handler(ctx, req)
 		if err != nil {
 			logger.ErrorContext(ctx, "grpc error", "error", err)
 		} else {

@@ -3,7 +3,8 @@ syntax = "proto3";
 option go_package = "./gen";
 
 service Worker {
-  rpc SetTestScript(SetTestScriptReq) returns(Empty) {}
+  rpc SetTestScript(TestScript) returns(Empty) {}
+  rpc GetTestScript(Empty) returns(TestScript) {}
   rpc Start(StartResp) returns(Empty) {}
   rpc Stop(Empty) returns(Empty) {}
   rpc ObserverChangeState(Empty) returns(stream StatusInfo) {}
@@ -17,7 +18,7 @@ message StartResp {
   int32 test_count = 4;
 }
 
-message SetTestScriptReq {
+message TestScript {
   string script = 1;
 }
 

@@ -5,18 +5,23 @@ import (
 	"embed"
 	"fmt"
 	"github.com/pkg/errors"
+	"math/rand/v2"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 //go:embed resource/*
 var staticFS embed.FS
 
 func (w *Worker) runTest(ctx context.Context, playwrightDir string) error {
-	w.logger.InfoContext(ctx, "exec run playwright test")
+	// небольшая рандомная задержка
+	time.Sleep(time.Duration(rand.IntN(5)) * time.Second)
+
+	w.logger.DebugContext(ctx, "exec run playwright test")
 
 	if strings.TrimSpace(w.script) == "" {
 		return errors.New("script not filled ")
@@ -87,15 +92,6 @@ func (w *Worker) create(ctx context.Context, rootDir string) error {
 	return nil
 }
 
-func replacePlaywrightConfig(rootDir string) error {
-	data, err := staticFS.ReadFile("resource/playwright.config.js")
-	if err != nil {
-		return err
-	}
-
-	targetPath := filepath.Join(rootDir, "playwright.config.js")
-	return os.WriteFile(targetPath, data, 0o644)
-}
 func (w *Worker) cmdRun(ctx context.Context, cmd *exec.Cmd) ([]byte, error) {
 	w.stopProcess(ctx, cmd)
 
@@ -126,6 +122,16 @@ func (w *Worker) cmdRun(ctx context.Context, cmd *exec.Cmd) ([]byte, error) {
 	}
 
 	return out, nil
+}
+
+func replacePlaywrightConfig(rootDir string) error {
+	data, err := staticFS.ReadFile("resource/playwright.config.js")
+	if err != nil {
+		return err
+	}
+
+	targetPath := filepath.Join(rootDir, "playwright.config.js")
+	return os.WriteFile(targetPath, data, 0o644)
 }
 
 // npx create-playwright@latest --quiet --lang=js --install-deps --gha
