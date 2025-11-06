@@ -9,8 +9,8 @@ test.describe('Свод отчетов', () => {
         await page.goto('https://localhost/sko/ru/');
 
         // Авторизация
-        await page.locator('#userName').fill('АдминистраторП');
-        await page.locator('#userPassword').fill('Ho0de3vi');
+        await page.locator('#userName').fill('Администратор');
+        await page.locator('#userPassword').fill('H');
         await page.getByRole('button', { name: 'Войти' }).click();
 
         // Сохраняем страницу для последующих тестов
