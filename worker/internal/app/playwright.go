@@ -17,15 +17,17 @@ import (
 //go:embed resource/*
 var staticFS embed.FS
 
-func (w *Worker) runTest(ctx context.Context, playwrightDir string) error {
+func (w *Worker) runTest(ctx context.Context, jobID, playwrightDir string) error {
 	// небольшая рандомная задержка
 	time.Sleep(time.Duration(rand.IntN(5)) * time.Second)
-
-	w.logger.DebugContext(ctx, "exec run playwright test")
+	w.logger.DebugContext(ctx, "exec run playwright test", "job_id", jobID)
 
 	if strings.TrimSpace(w.script) == "" {
 		return errors.New("script not filled ")
 	}
+
+	outDir := filepath.Join(playwrightDir, jobID)
+	_ = os.Mkdir(outDir, os.ModeDir)
 
 	f, err := os.CreateTemp(filepath.Join(playwrightDir, "tests"), "*.spec.js")
 	if err != nil {
@@ -36,11 +38,14 @@ func (w *Worker) runTest(ctx context.Context, playwrightDir string) error {
 	defer os.Remove(f.Name())
 
 	_, file := filepath.Split(f.Name())
-	cmd := exec.CommandContext(ctx, "npx", "playwright", "test", "tests/"+file, "--project", "chromium")
+	cmd := exec.CommandContext(ctx, "npx", "playwright", "test", "tests/"+file, "--project", "chromium", "--output", outDir)
 	cmd.Dir = playwrightDir
 	cmd.Env = append(os.Environ(), "PLAYWRIGHT_HTML_OPEN=never") // что б не открывался отчет в браузере
 
 	_, err = w.cmdRun(ctx, cmd)
+	if err == nil {
+		_ = os.RemoveAll(outDir)
+	}
 	return err
 }
 

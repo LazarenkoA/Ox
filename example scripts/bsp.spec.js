@@ -41,9 +41,9 @@ test.describe('Тест БСП', () => {
         await doubleClickRandomRow(global.page);
         await buttonClick(global.page, 'ФормаЗаписатьИЗакрыть');
 
-        const count = await global.page.locator('id$="_CommandButtonOK"');
+        const count = await global.page.locator('[id$="_CommandButtonOK"]').count();
         if(count > 0) {
-            await global.page.locator('id$="_CommandButtonOK"').click();
+            await global.page.locator('[id$="_CommandButtonOK"]').click();
             await closeButton(global.page, 'ФормаЗаписатьИЗакрыть')
         }
     });

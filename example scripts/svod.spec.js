@@ -24,9 +24,10 @@ test('Тест свод отчетов', async ({ page }) => {
     await doubleClickRandomRow(page);
     await closeButton(page, 'ФормаЗаписатьИЗакрыть')
 
-    const count = await page.locator('id$="_CommandButtonOK"');
+    await page.waitForTimeout(100);
+    const count = await page.locator('[id$="_CommandButtonOK"]').count();
     if(count > 0) {
-        await page.locator('id$="_CommandButtonOK"').click();
+        await page.locator('[id$="_CommandButtonOK"]').click();
         await closeButton(page, 'ФормаЗаписатьИЗакрыть')
     }
 
