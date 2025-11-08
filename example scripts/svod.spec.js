@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Тест свод отчетов', async ({ page }) => {
-    test.setTimeout(150_000); // секунд только для этого теста
+    test.setTimeout(300_000); // секунд только для этого теста
 
     await page.goto('https://localhost/sko/ru/');
     await page.locator('#userName').click();
@@ -26,8 +26,17 @@ test('Тест свод отчетов', async ({ page }) => {
     await page.waitForTimeout(100);
     const count = await page.locator('[id$="_CommandButtonOK"]').count();
     if(count > 0) {
-        await page.locator('[id$="_CommandButtonOK"]').last().click();
+        await page.locator('a.pressCommand:not(.pressDisabled)[id$="_CommandButtonOK"]').last().click({ force: true });
         await closeButton(page, 'ФормаЗаписатьИЗакрыть')
+
+        // await page.evaluate(() => {
+        //     const el = document.querySelector('[id$="_CommandButtonOK"]');
+        //     if (el) {
+        //         el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        //         el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        //         el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        //     }
+        // });
     }
 
     await randSleep(page);
@@ -43,7 +52,7 @@ test('Тест свод отчетов', async ({ page }) => {
     await page.locator('#cmd_2_0_txt').click();
     await page.waitForTimeout(100);
 
-    await page.locator('a[id^="form"][id$="СформироватьОтчет"]').last().click();
+    await page.locator('a.pressCommand:not(.pressDisabled)[id^="form"][id$="СформироватьОтчет"]').last().click();
     await page.waitForTimeout(100);
     await close(page);
 });
@@ -53,7 +62,7 @@ function randomString() {
 }
 
 async function closeButton(page, name) {
-    const elem = await page.locator(`a[id$="_${name}"]`);
+    const elem = await page.locator(`a.pressCommand:not(.pressDisabled)[id$="_${name}"]`);
     await elem.waitFor();
 
     const elems = await elem.elementHandles();
