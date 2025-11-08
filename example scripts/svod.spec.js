@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Тест свод отчетов', async ({ page }) => {
-    test.setTimeout(100_000); // секунд только для этого теста
+    test.setTimeout(150_000); // секунд только для этого теста
 
     await page.goto('https://localhost/sko/ru/');
     await page.locator('#userName').click();
@@ -14,37 +14,37 @@ test('Тест свод отчетов', async ({ page }) => {
     await page.getByText('Ф. 0503737').nth(2).dblclick();
     await close(page);
 
-    await page.waitForTimeout(100);
+    await randSleep(page);
     await page.getByText('Нормативно-справочная').click();
     await page.waitForTimeout(100);
 
     await page.getByText('Бюджеты').click();
-    await page.waitForTimeout(100);
-
+    await randSleep(page);
     await doubleClickRandomRow(page);
     await closeButton(page, 'ФормаЗаписатьИЗакрыть')
 
     await page.waitForTimeout(100);
     const count = await page.locator('[id$="_CommandButtonOK"]').count();
     if(count > 0) {
-        await page.locator('[id$="_CommandButtonOK"]').click();
+        await page.locator('[id$="_CommandButtonOK"]').last().click();
         await closeButton(page, 'ФормаЗаписатьИЗакрыть')
     }
 
-    await page.waitForTimeout(500);
+    await randSleep(page);
     await page.getByText('Анализ данных').click();
-    await page.waitForTimeout(500); // пауза
+    await page.waitForTimeout(100); // пауза
     await page.locator('#cmd_0_0_txt').click();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
     await close(page);
 
+    await randSleep(page);
     await page.getByText('Комплект отчетности').click();
     await page.waitForTimeout(200);
     await page.locator('#cmd_2_0_txt').click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     await page.locator('a[id^="form"][id$="СформироватьОтчет"]').last().click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
     await close(page);
 });
 
@@ -105,4 +105,10 @@ async function close(page) {
     } catch (error) {
         console.warn('⚠️ Кнопка закрытия не найдена или не кликабельна:', error.message);
     }
+}
+
+async function randSleep(page) {
+    const delay = Math.floor(Math.random() * 5000)+100;
+    console.log(`Задержка на ${delay/1000} секунд`)
+    await page.waitForTimeout(delay);
 }

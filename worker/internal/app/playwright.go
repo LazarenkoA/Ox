@@ -5,29 +5,24 @@ import (
 	"embed"
 	"fmt"
 	"github.com/pkg/errors"
-	"math/rand/v2"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 )
 
 //go:embed resource/*
 var staticFS embed.FS
 
 func (w *Worker) runTest(ctx context.Context, jobID, playwrightDir string) error {
-	// небольшая рандомная задержка
-	time.Sleep(time.Duration(rand.IntN(5)) * time.Second)
 	w.logger.DebugContext(ctx, "exec run playwright test", "job_id", jobID)
 
 	if strings.TrimSpace(w.script) == "" {
 		return errors.New("script not filled ")
 	}
 
-	outDir := filepath.Join(playwrightDir, jobID)
-	_ = os.Mkdir(outDir, os.ModeDir)
+	outDir := filepath.Join(playwrightDir, "reports", jobID)
 
 	f, err := os.CreateTemp(filepath.Join(playwrightDir, "tests"), "*.spec.js")
 	if err != nil {
@@ -38,13 +33,17 @@ func (w *Worker) runTest(ctx context.Context, jobID, playwrightDir string) error
 	defer os.Remove(f.Name())
 
 	_, file := filepath.Split(f.Name())
-	cmd := exec.CommandContext(ctx, "npx", "playwright", "test", "tests/"+file, "--project", "chromium", "--output", outDir)
+	cmd := exec.CommandContext(ctx, "npx", "playwright", "test", "tests/"+file, "--project", "chromium", "--reporter", "html")
 	cmd.Dir = playwrightDir
-	cmd.Env = append(os.Environ(), "PLAYWRIGHT_HTML_OPEN=never") // что б не открывался отчет в браузере
+	cmd.Env = append(os.Environ(),
+		"PLAYWRIGHT_HTML_OPEN=never", // что б не открывался отчет в браузере
+		"PLAYWRIGHT_HTML_OUTPUT_DIR="+outDir,
+		"PLAYWRIGHT_VIDEO_MODE=retain-on-failure", // сохранит видео только для fallen тестов
+	)
 
 	_, err = w.cmdRun(ctx, cmd)
 	if err == nil {
-		_ = os.RemoveAll(outDir)
+		_ = os.RemoveAll(outDir) // если не было ошибки киляем каталог
 	}
 	return err
 }

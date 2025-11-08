@@ -318,7 +318,7 @@ https://github.com/user-attachments/assets/6b5f548f-06bd-4ad5-a199-10ccb4ecf539
 
 Находятся в:
 ```
-<worker_dir>/playwright/<job_id>
+<worker_dir>/playwright/reports/<job_id>
 ```
 `job_id` - уникальный идентификатор, можно посмотреть в логах воркера.
 
