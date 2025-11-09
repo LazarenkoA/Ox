@@ -266,7 +266,7 @@ npx playwright test ./tests/bsp.spec.js --project=chromium --ui
 После выполнения тестов на worker'е, результаты находятся в:
 
 ```
-<worker_dir>/playwright/playwright-report/index.html
+<worker_dir>/playwright/reports/<job_id>
 ```
 
 Отчёт содержит:
